@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "312493899175",
+    "project_id": "mynotes-omakran-4587e",
+    "storage_bucket": "mynotes-omakran-4587e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:312493899175:android:953313da5adf5958fe8a82",
+        "android_client_info": {
+          "package_name": "me.makran.omar.mynote"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIIyvFhOly-v1L28e9py5y9O0OGzi54RQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:312493899175:android:2bd168468b0cbe26fe8a82",
+        "android_client_info": {
+          "package_name": "me.makran.omar.mynote.mynote"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIIyvFhOly-v1L28e9py5y9O0OGzi54RQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
