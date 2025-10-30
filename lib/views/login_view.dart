@@ -17,7 +17,7 @@ class _LoginViewState extends State<LoginView> {
   void initState() {
     _email = TextEditingController();
     _password = TextEditingController();
-    // Rebuild the widget when the password text changes to update the icon visibility.
+
     _password.addListener(() {
       setState(() {});
     });
@@ -35,7 +35,6 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Login'),
       ),
       body: Padding(
@@ -63,44 +62,57 @@ class _LoginViewState extends State<LoginView> {
               decoration: InputDecoration(
                 border: const OutlineInputBorder(),
                 hintText: 'Password',
-                // Show the icon only if the password field is not empty.
                 suffixIcon: _password.text.isNotEmpty
                     ? IconButton(
                         icon: Icon(
-                          // Change the icon based on the obscureText state.
                           _obscureText
                               ? Icons.visibility_off
                               : Icons.visibility,
                         ),
                         onPressed: () {
-                          // Toggle the password's visibility on press.
                           setState(() {
                             _obscureText = !_obscureText;
                           });
                         },
                       )
-                    : null, // Otherwise, show no icon.
+                    : null,
               ),
             ),
             const SizedBox(height: 16.0),
             TextButton(
               onPressed: () async {
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
                 try {
-                  // Sign in the user.
                   await FirebaseAuth.instance.signInWithEmailAndPassword(
                     email: _email.text,
                     password: _password.text,
                   );
                 } on FirebaseAuthException {
-                  print(
-                      'Invalid email or password. Please check your credentials and try again.');
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(
+                      content:
+                          Text('Invalid email or password. Please try again.'),
+                    ),
+                  );
                 } catch (e) {
-                  // Handle other potential errors.
-                  print('An unexpected error occurred: $e');
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text('An unexpected error occurred: $e'),
+                    ),
+                  );
                 }
               },
               child: const Text('Login'),
             ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/register/',
+                  (route) => false,
+                );
+              },
+              child: const Text('Not registered yet? Register here!'),
+            )
           ],
         ),
       ),
