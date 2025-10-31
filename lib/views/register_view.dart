@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mynote/utilities/show_error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -87,15 +88,22 @@ class _RegisterViewState extends State<RegisterView> {
                     password: _password.text,
                   );
                 } on FirebaseAuthException catch (e) {
+                  if (!mounted) return;
                   if (e.code == 'weak-password') {
-                    print('The password provided is too weak.');
+                    await showErrorDialog(context, 'The password provided is too weak.');
                   } else if (e.code == 'email-already-in-use') {
-                    print('The account already exists for that email.');
+                    await showErrorDialog(context, 'The account already exists for that email.');
                   } else if (e.code == 'invalid-email') {
-                    print('The email address is badly formatted.');
+                    await showErrorDialog(context, 'The email address is badly formatted.');
                   } else {
-                    print('Error registering: ${e.message}');
+                    await showErrorDialog(context, 'Error: ${e.code}');
                   }
+                } catch (e) {
+                  if (!mounted) return;
+                  await showErrorDialog(
+                    context,
+                    'An unexpected error occurred. Please try again.',
+                  );
                 }
               },
               child: const Text('Register'),

@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mynote/utilities/show_error_dialog.dart';
+import 'package:mynote/utilities/show_generic_dialog.dart';
 
 class VerifyEmailView extends StatefulWidget {
   const VerifyEmailView({super.key});
@@ -33,64 +32,25 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
             const Text('Please verify your email address.'),
             TextButton(
               onPressed: () async {
-                final scaffoldMessenger = ScaffoldMessenger.of(context);
-                final navigator = Navigator.of(context);
-
                 try {
                   final user = FirebaseAuth.instance.currentUser;
                   await user?.sendEmailVerification();
-
                   if (!mounted) return;
-                  if (Platform.isIOS) {
-                    await showCupertinoDialog(
-                      context: context,
-                      builder: (context) => CupertinoAlertDialog(
-                        title: const Text('Verification Email Sent'),
-                        content: const Text(
-                            'A verification link has been sent to your email.'),
-                        actions: [
-                          CupertinoDialogAction(
-                            isDefaultAction: true,
-                            onPressed: () => navigator.pop(),
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    scaffoldMessenger.showSnackBar(
-                      const SnackBar(
-                        content: Text('Verification email sent!'),
-                      ),
-                    );
-                  }
+                  await showGenericDialog(
+                    context: context,
+                    title: 'Verification Email Sent',
+                    content: 'A verification link has been sent to your email.',
+                    buttonText: 'OK',
+                  );
                 } on FirebaseException catch (e) {
                   if (!mounted) return;
-
-                  final message = e.message ?? "An unknown error occurred.";
-
-                  if (Platform.isIOS) {
-                    await showCupertinoDialog(
-                      context: context,
-                      builder: (context) => CupertinoAlertDialog(
-                        title: const Text('Error'),
-                        content: Text(message),
-                        actions: [
-                          CupertinoDialogAction(
-                            isDefaultAction: true,
-                            onPressed: () => navigator.pop(),
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    scaffoldMessenger.showSnackBar(
-                      SnackBar(
-                        content: Text('Error: $message'),
-                      ),
-                    );
-                  }
+                  await showErrorDialog(context, 'Error: ${e.message}');
+                } catch (e) {
+                  if (!mounted) return;
+                  await showErrorDialog(
+                    context,
+                    'An unexpected error occurred. Please try again.',
+                  );
                 }
               },
               child: const Text('Send verification email'),

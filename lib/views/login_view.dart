@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mynote/utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -81,24 +82,24 @@ class _LoginViewState extends State<LoginView> {
             const SizedBox(height: 16.0),
             TextButton(
               onPressed: () async {
-                final scaffoldMessenger = ScaffoldMessenger.of(context);
                 try {
                   await FirebaseAuth.instance.signInWithEmailAndPassword(
                     email: _email.text,
                     password: _password.text,
                   );
-                } on FirebaseAuthException {
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(
-                      content:
-                          Text('Invalid email or password. Please try again.'),
-                    ),
-                  );
+                } on FirebaseAuthException catch (e) {
+                  if (!mounted) return;
+                  if (e.code == 'invalid-credential') {
+                    await showErrorDialog(
+                        context, 'User not found or wrong password.');
+                  } else {
+                    await showErrorDialog(context, 'Error: ${e.code}');
+                  }
                 } catch (e) {
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text('An unexpected error occurred: $e'),
-                    ),
+                  if (!mounted) return;
+                  await showErrorDialog(
+                    context,
+                    'An unexpected error occurred. Please try again.',
                   );
                 }
               },
