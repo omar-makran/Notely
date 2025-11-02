@@ -1,11 +1,11 @@
-import 'dart:io' show Platform;
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:mynote/views/login_view.dart';
+import 'package:mynote/views/notes_view.dart';
 import 'package:mynote/views/register_view.dart';
 import 'package:mynote/views/verify_email_view.dart';
+import 'dart:developer' as devtools show log;
 
 import 'firebase_options.dart';
 
@@ -66,11 +66,7 @@ class _HomePageState extends State<HomePage> {
                 if (snapshot.hasData) {
                   final user = FirebaseAuth.instance.currentUser;
                   if (user?.emailVerified ?? false) {
-                    return const Scaffold(
-                      body: Center(
-                        child: Text('You are logged in!'),
-                      ),
-                    );
+                    return const NotesView();
                   } else {
                     return const VerifyEmailView();
                   }
