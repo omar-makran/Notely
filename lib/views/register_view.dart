@@ -87,6 +87,10 @@ class _RegisterViewState extends State<RegisterView> {
                     email: _email.text,
                     password: _password.text,
                   );
+                  final user = FirebaseAuth.instance.currentUser;
+                  await user?.sendEmailVerification();
+                  if (!mounted) return;
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                 } on FirebaseAuthException catch (e) {
                   if (!mounted) return;
                   if (e.code == 'weak-password') {
@@ -110,10 +114,7 @@ class _RegisterViewState extends State<RegisterView> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/login/',
-                  (route) => false,
-                );
+                Navigator.of(context).pop();
               },
               child: const Text('Already have an account? Login here!'),
             )

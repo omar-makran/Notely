@@ -87,6 +87,8 @@ class _LoginViewState extends State<LoginView> {
                     email: _email.text,
                     password: _password.text,
                   );
+                  if (!mounted) return;
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                 } on FirebaseAuthException catch (e) {
                   if (!mounted) return;
                   if (e.code == 'invalid-credential') {
@@ -107,10 +109,7 @@ class _LoginViewState extends State<LoginView> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/register/',
-                  (route) => false,
-                );
+                Navigator.of(context).pushNamed('/register/');
               },
               child: const Text('Not registered yet? Register here!'),
             )

@@ -29,7 +29,8 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Please verify your email address.'),
+            const Text('A verification email has been sent to your email.'),
+            const Text('Please check your email inbox and verify your email.'),
             TextButton(
               onPressed: () async {
                 try {
