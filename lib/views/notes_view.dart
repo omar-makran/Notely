@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mynote/constants/routes.dart';
 
 import '../utilities/show_logout_dialog.dart';
 
@@ -20,8 +21,12 @@ class _NotesViewState extends State<NotesView> {
   Future<void> _handleLogout() async {
     final shouldLogout = await showLogOutDialog(context);
     if (shouldLogout) {
-      if (!mounted) return;
       await FirebaseAuth.instance.signOut();
+      if (!mounted) return;
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        loginRoute,
+        (_) => false,
+      );
     }
   }
 
