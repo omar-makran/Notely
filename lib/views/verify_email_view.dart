@@ -1,7 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mynote/services/auth/auth_exceptions.dart';
 import 'package:mynote/utilities/show_error_dialog.dart';
 import 'package:mynote/utilities/show_generic_dialog.dart';
+
+import '../services/auth/auth_service.dart';
 
 class VerifyEmailView extends StatefulWidget {
   const VerifyEmailView({super.key});
@@ -20,7 +22,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await FirebaseAuth.instance.signOut();
+              await AuthService.firebase().logOut();;
             },
           )
         ],
@@ -34,8 +36,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
             TextButton(
               onPressed: () async {
                 try {
-                  final user = FirebaseAuth.instance.currentUser;
-                  await user?.sendEmailVerification();
+                  await AuthService.firebase().sendEmailVerification();
                   if (!mounted) return;
                   await showGenericDialog(
                     context: context,
@@ -43,15 +44,9 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
                     content: 'A verification link has been sent to your email.',
                     buttonText: 'OK',
                   );
-                } on FirebaseException catch (e) {
+                } on GenericAuthException {
                   if (!mounted) return;
-                  await showErrorDialog(context, 'Error: ${e.message}');
-                } catch (e) {
-                  if (!mounted) return;
-                  await showErrorDialog(
-                    context,
-                    'An unexpected error occurred. Please try again.',
-                  );
+                  await showErrorDialog(context, 'An unexpected error occurred. Please try again.');
                 }
               },
               child: const Text('Send verification email'),
