@@ -1,6 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mynote/services/auth/auth_service.dart';
 import 'package:mynote/utilities/show_error_dialog.dart';
+
+import '../services/auth/auth_exceptions.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -83,26 +85,24 @@ class _RegisterViewState extends State<RegisterView> {
             TextButton(
               onPressed: () async {
                 try {
-                  await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                  await AuthService.firebase().createUser(
                     email: _email.text,
                     password: _password.text,
                   );
-                  final user = FirebaseAuth.instance.currentUser;
-                  await user?.sendEmailVerification();
+                  AuthService.firebase().sendEmailVerification();
                   if (!mounted) return;
                   Navigator.of(context).popUntil((route) => route.isFirst);
-                } on FirebaseAuthException catch (e) {
+                } on WeakPasswordAuthException {
                   if (!mounted) return;
-                  if (e.code == 'weak-password') {
-                    await showErrorDialog(context, 'The password provided is too weak.');
-                  } else if (e.code == 'email-already-in-use') {
+                  await showErrorDialog(
+                      context, 'The password provided is too weak.');
+                } on EmailAlreadyInUseAuthException {
+                  if (!mounted) return;
                     await showErrorDialog(context, 'The account already exists for that email.');
-                  } else if (e.code == 'invalid-email') {
-                    await showErrorDialog(context, 'The email address is badly formatted.');
-                  } else {
-                    await showErrorDialog(context, 'Error: ${e.code}');
-                  }
-                } catch (e) {
+                  } on InvalidEmailAuthException {
+                  if (!mounted) return;
+                  await showErrorDialog(context, 'The email address is badly formatted.');
+                } on GenericAuthException {
                   if (!mounted) return;
                   await showErrorDialog(
                     context,
