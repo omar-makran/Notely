@@ -22,7 +22,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await AuthService.firebase().logOut();;
+              await AuthService.firebase().logOut();
             },
           )
         ],
