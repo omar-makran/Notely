@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mynote/services/auth/auth_service.dart';
+import 'package:mynote/services/crud/notes_service.dart';
 
 import '../enums/menu_action.dart';
 import '../utilities/show_logout_dialog.dart';
@@ -15,6 +16,21 @@ class NotesView extends StatefulWidget {
 }
 
 class _NotesViewState extends State<NotesView> {
+
+  late final NotesService _notesService;
+  String get userEmail => AuthService.firebase().currentUser!.email!;
+  
+  @override
+  void initState() {
+    _notesService = NotesService();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _notesService.close();
+    super.dispose();
+  }
 
   Future<void> _handleLogout() async {
     final shouldLogout = await showLogOutDialog(context);
@@ -80,8 +96,26 @@ class _NotesViewState extends State<NotesView> {
         title: const Text('Notes'),
         actions: [_buildAppBarActions()],
       ),
-      body: const Center(
-        child: Text('Notes View'),
+      body: FutureBuilder(
+        future: _notesService.createUser(email: userEmail),
+        builder:(context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.done:
+              return StreamBuilder(
+                stream: _notesService.allNotes,
+                builder: (context, snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.waiting:
+                      return const Text("Waiting for all notes...");git
+                    default:
+                      return const CircularProgressIndicator();
+                  }
+                },
+              );
+            default:
+              return const CircularProgressIndicator();
+          }
+        },
       ),
     );
   }
