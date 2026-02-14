@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:mynote/services/auth/auth_service.dart';
 import 'package:mynote/services/crud/notes_service.dart';
 
-import '../enums/menu_action.dart';
-import '../utilities/show_logout_dialog.dart';
+import '../../enums/menu_action.dart';
+import '../../utilities/show_logout_dialog.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});
@@ -38,6 +38,10 @@ class _NotesViewState extends State<NotesView> {
       if (!mounted) return;
       await AuthService.firebase().logOut();
     }
+  }
+
+  void _navigateToNewNote() {
+    Navigator.of(context).pushNamed('/notes/new-note');
   }
 
   Widget _buildAppBarActions() {
@@ -93,9 +97,20 @@ class _NotesViewState extends State<NotesView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notes'),
-        actions: [_buildAppBarActions()],
+        title: const Text('Your Notes'),
+        actions: [
+          if (Platform.isIOS)
+            IconButton(
+              onPressed: _navigateToNewNote,
+              icon: const Icon(Icons.add)
+              ),
+              _buildAppBarActions()
+          ],
       ),
+      // Android: Floating Action Button (native Material pattern)
+      floatingActionButton: Platform.isIOS ? null : FloatingActionButton(
+        onPressed: _navigateToNewNote,
+        child: Icon(Icons.add),),
       body: FutureBuilder(
         future: _notesService.createUser(email: userEmail),
         builder:(context, snapshot) {
@@ -106,7 +121,7 @@ class _NotesViewState extends State<NotesView> {
                 builder: (context, snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
-                      return const Text("Waiting for all notes...");git
+                      return const Text("Waiting for all notes...");
                     default:
                       return const CircularProgressIndicator();
                   }
