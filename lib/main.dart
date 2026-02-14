@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mynote/services/auth/auth_service.dart';
 import 'package:mynote/views/login_view.dart';
-import 'package:mynote/views/notes_view.dart';
+import 'package:mynote/views/notes/new_note_view.dart';
+import 'package:mynote/views/notes/notes_view.dart';
 import 'package:mynote/views/register_view.dart';
 import 'package:mynote/views/verify_email_view.dart';
 
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
         '/register/': (context) => const RegisterView(),
         '/verify-email/': (context) => const VerifyEmailView(),
         '/notes/': (context) => const NotesView(),
+        '/notes/new-note': (context) => const NewNoteView(),
       },
       debugShowCheckedModeBanner: false,
     );
