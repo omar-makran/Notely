@@ -219,7 +219,7 @@ class NotesService {
 
   Future<void> _ensureDbIsOpen() async {
     try {
-      open();
+      await open();
     } on DatabaseAlreadyOpenException {
       // empty for now
     }
@@ -245,8 +245,8 @@ class NotesService {
       final db = await openDatabase(dbPath);
       // assign the opened database to the _db variable
       _db = db;
-        db.execute(createUserTable);
-        db.execute(createNoteTable);
+        await db.execute(createUserTable);
+        await db.execute(createNoteTable);
         await _cacheNotes();
     } on MissingPlatformDirectoryException {
       throw UnableToGetDocumentsDirectory();
@@ -346,8 +346,7 @@ const isSyncedWithCloudColumn = 'is_synced_with_cloud';
 const String createUserTable = '''
   CREATE TABLE IF NOT EXISTS "user" (
   "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-  "email" TEXT NOT NULL UNIQUE,
-  PRIMARY KEY("id" AUTOINCREMENT)
+  "email" TEXT NOT NULL UNIQUE
   ); ''';
 
 // The notes table has an id column that is the primary key, a user_id column that is a foreign key referencing the user table, a text column for the note content,
@@ -360,6 +359,5 @@ const String createNoteTable = '''
   "user_id" INTEGER NOT NULL,
   "text" TEXT,
   "is_synced_with_cloud" INTEGER NOT NULL DEFAULT 0,
-  FOREIGN KEY("user_id") REFERENCES "user"("id"),
-  PRIMARY KEY("id" AUTOINCREMENT)
+  FOREIGN KEY("user_id") REFERENCES "user"("id")
   );''';
