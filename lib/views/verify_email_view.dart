@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mynote/services/auth/auth_exceptions.dart';
-import 'package:mynote/utilities/show_error_dialog.dart';
-import 'package:mynote/utilities/show_generic_dialog.dart';
+import 'package:mynote/utilities/dialogs/error_dialog.dart';
+import 'package:mynote/utilities/dialogs/genereic_dialog.dart';
 
 import '../services/auth/auth_service.dart';
 
@@ -38,11 +38,11 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
                 try {
                   await AuthService.firebase().sendEmailVerification();
                   if (!mounted) return;
-                  await showGenericDialog(
+                  await showGenirecDialog(
                     context: context,
                     title: 'Verification Email Sent',
                     content: 'A verification link has been sent to your email.',
-                    buttonText: 'OK',
+                    optionsBuilder: () => {'OK': null},
                   );
                 } on GenericAuthException {
                   if (!mounted) return;

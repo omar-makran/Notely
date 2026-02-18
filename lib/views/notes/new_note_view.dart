@@ -21,7 +21,7 @@ class _NewNoteViewState extends State<NewNoteView> {
     super.initState();
   }
 
-  void  _textControllerListner() async {
+  void _textControllerListner() async {
     final note = _note;
     if (note == null) {
       return;
@@ -68,39 +68,38 @@ class _NewNoteViewState extends State<NewNoteView> {
     _textConteroller.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            title: const Text('New Note'),
-        ),
-        body: FutureBuilder(
-          future: createNewNote(),
-          builder:(context, snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.done:
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-                if (snapshot.hasData) {
-                  _note = snapshot.data as DatabaseNotes;
-                  _setUpTextControllerListner();
-                  return TextField(
-                    controller: _textConteroller,
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                    decoration: const InputDecoration(
-                      hintText: "I have a meeting ...",
-                    ),
-                  );
-                } else {
-                  return const Center(child: Text('Could not create note.'));
-                }
-              default:
-                return const CircularProgressIndicator();
-            }
-          },
-          ),
+      appBar: AppBar(title: const Text('New Note')),
+      body: FutureBuilder(
+        future: createNewNote(),
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.done:
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
+              if (snapshot.hasData) {
+                _note = snapshot.data as DatabaseNotes;
+                _setUpTextControllerListner();
+                return TextField(
+                  controller: _textConteroller,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  decoration: const InputDecoration(
+                    hintText: "I have a meeting ...",
+                  ),
+                );
+              } else {
+                return const Center(child: Text('Could not create note.'));
+              }
+            default:
+              return const CircularProgressIndicator();
+          }
+        },
+      ),
     );
   }
 }

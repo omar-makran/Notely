@@ -4,9 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mynote/services/auth/auth_service.dart';
 import 'package:mynote/services/crud/notes_service.dart';
+import 'package:mynote/views/notes/notes_list_view.dart';
 
 import '../../enums/menu_action.dart';
-import '../../utilities/show_logout_dialog.dart';
+import '../../utilities/dialogs/show_logout_dialog.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});
@@ -16,10 +17,9 @@ class NotesView extends StatefulWidget {
 }
 
 class _NotesViewState extends State<NotesView> {
-
   late final NotesService _notesService;
   String get userEmail => AuthService.firebase().currentUser!.email!;
-  
+
   @override
   void initState() {
     _notesService = NotesService();
@@ -96,18 +96,21 @@ class _NotesViewState extends State<NotesView> {
           if (Platform.isIOS)
             IconButton(
               onPressed: _navigateToNewNote,
-              icon: const Icon(Icons.add)
-              ),
-              _buildAppBarActions()
-          ],
+              icon: const Icon(Icons.add),
+            ),
+          _buildAppBarActions(),
+        ],
       ),
       // Android: Floating Action Button (native Material pattern)
-      floatingActionButton: Platform.isIOS ? null : FloatingActionButton(
-        onPressed: _navigateToNewNote,
-        child: Icon(Icons.add),),
+      floatingActionButton: Platform.isIOS
+          ? null
+          : FloatingActionButton(
+              onPressed: _navigateToNewNote,
+              child: Icon(Icons.add),
+            ),
       body: FutureBuilder(
         future: _notesService.createUser(email: userEmail),
-        builder:(context, snapshot) {
+        builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
               return StreamBuilder(
@@ -116,25 +119,17 @@ class _NotesViewState extends State<NotesView> {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
                     case ConnectionState.active:
-                    if (snapshot.hasData) {
-                      final allNotes = snapshot.data as List<DatabaseNotes>;
-                      return ListView.builder(
-                        itemCount: allNotes.length,
-                        itemBuilder: (context, index) {
-                          final note = allNotes[index];
-                          return ListTile(
-                            title: Text(
-                              note.text,
-                              maxLines: 1,
-                              softWrap: true,
-                              overflow: TextOverflow.ellipsis,
-                              ),
-                          );
-                        },
-                      );
-                    } else {
-                      return const CircularProgressIndicator();
-                    }
+                      if (snapshot.hasData) {
+                        final allNotes = snapshot.data as List<DatabaseNotes>;
+                        return NotesListView(
+                          notes: allNotes,
+                          onDeleteNote: (note) async {
+                            await _notesService.deleteNote(id: note.id);
+                          },
+                        );
+                      } else {
+                        return const CircularProgressIndicator();
+                      }
                     default:
                       return const CircularProgressIndicator();
                   }
