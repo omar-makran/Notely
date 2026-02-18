@@ -1,17 +1,23 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mynote/services/crud/notes_service.dart';
 import 'package:mynote/utilities/dialogs/show_delete_dialog.dart';
 
 typedef DeleteNoteCallBack = void Function(DatabaseNotes note);
+typedef ShareNoteCallBack = void Function(DatabaseNotes note);
 
 class NotesListView extends StatelessWidget {
   final List<DatabaseNotes> notes;
   final DeleteNoteCallBack onDeleteNote;
+  final ShareNoteCallBack onShareNote;
 
   const NotesListView({
     super.key,
     required this.notes,
     required this.onDeleteNote,
+    required this.onShareNote,
   });
 
   @override
@@ -27,12 +33,26 @@ class NotesListView extends StatelessWidget {
             softWrap: true,
             overflow: TextOverflow.ellipsis,
           ),
-          trailing: IconButton(onPressed: () async {
-            final shouldDelete = await showDeleteDialog(context);
-            if (shouldDelete) {
-              onDeleteNote(note);
-            }
-          }, icon: const Icon(Icons.delete)),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                onPressed: () async {
+                  final shouldDelete = await showDeleteDialog(context);
+                  if (shouldDelete) {
+                    onDeleteNote(note);
+                  }
+                },
+                icon: const Icon(Icons.delete),
+              ),
+              IconButton(
+                onPressed: () async {
+                  onShareNote(note);
+                },
+                icon: Icon(Platform.isIOS ? CupertinoIcons.share : Icons.share),
+              ),
+            ],
+          ),
         );
       },
     );

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:mynote/services/auth/auth_service.dart';
 import 'package:mynote/services/crud/notes_service.dart';
 import 'package:mynote/views/notes/notes_list_view.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../enums/menu_action.dart';
 import '../../utilities/dialogs/show_logout_dialog.dart';
@@ -125,6 +126,9 @@ class _NotesViewState extends State<NotesView> {
                           notes: allNotes,
                           onDeleteNote: (note) async {
                             await _notesService.deleteNote(id: note.id);
+                          },
+                          onShareNote: (DatabaseNotes note) {
+                            SharePlus.instance.share(ShareParams(text: note.text));
                           },
                         );
                       } else {
