@@ -4,8 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mynote/services/auth/auth_service.dart';
 import 'package:mynote/services/crud/notes_service.dart';
+import 'package:mynote/utilities/dialogs/genereic_dialog.dart';
 import 'package:mynote/views/notes/notes_list_view.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter/services.dart';
 
 import '../../enums/menu_action.dart';
 import '../../utilities/dialogs/show_logout_dialog.dart';
@@ -127,8 +129,30 @@ class _NotesViewState extends State<NotesView> {
                           onDeleteNote: (note) async {
                             await _notesService.deleteNote(id: note.id);
                           },
-                          onShareNote: (DatabaseNotes note) {
-                            SharePlus.instance.share(ShareParams(text: note.text));
+                          onShareNote: (DatabaseNotes note) async {
+                            await SharePlus.instance.share(
+                              ShareParams(text: note.text),
+                            );
+                          },
+                          onCopyNote: (DatabaseNotes note) async {
+                            await Clipboard.setData(
+                              ClipboardData(text: note.text),
+                            );
+                            if (!mounted) return;
+                            if (Platform.isIOS) {
+                              showGenirecDialog(
+                                context: context,
+                                title: 'Copied',
+                                content: 'Copied to clipboard!',
+                                optionsBuilder: () => {'Ok': null},
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Copied to clipboard!'),
+                                ),
+                              );
+                            }
                           },
                         );
                       } else {

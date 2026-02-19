@@ -7,17 +7,20 @@ import 'package:mynote/utilities/dialogs/show_delete_dialog.dart';
 
 typedef DeleteNoteCallBack = void Function(DatabaseNotes note);
 typedef ShareNoteCallBack = void Function(DatabaseNotes note);
+typedef CopyNoteCallBack = void Function(DatabaseNotes note);
 
 class NotesListView extends StatelessWidget {
   final List<DatabaseNotes> notes;
   final DeleteNoteCallBack onDeleteNote;
   final ShareNoteCallBack onShareNote;
+  final CopyNoteCallBack onCopyNote;
 
   const NotesListView({
     super.key,
     required this.notes,
     required this.onDeleteNote,
     required this.onShareNote,
+    required this.onCopyNote,
   });
 
   @override
@@ -27,6 +30,9 @@ class NotesListView extends StatelessWidget {
       itemBuilder: (context, index) {
         final note = notes[index];
         return ListTile(
+          onLongPress: () {
+            onCopyNote(note);
+          },
           title: Text(
             note.text,
             maxLines: 1,
