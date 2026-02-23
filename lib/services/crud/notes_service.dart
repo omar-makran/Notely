@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mynote/services/crud/crud_exceptions.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path_provider/path_provider.dart' show MissingPlatformDirectoryException, getApplicationDocumentsDirectory;
+import 'package:path_provider/path_provider.dart'
+    show MissingPlatformDirectoryException, getApplicationDocumentsDirectory;
 import 'package:path/path.dart' show join;
 
 class NotesService {
@@ -40,7 +41,11 @@ class NotesService {
     _notes = allNotes.toList();
     _notesStreamController.add(_notes);
   }
-  Future<DatabaseNotes> updateNote({required DatabaseNotes note, required String text}) async {
+
+  Future<DatabaseNotes> updateNote({
+    required DatabaseNotes note,
+    required String text,
+  }) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     // make sure note exists
@@ -64,9 +69,7 @@ class NotesService {
   Future<Iterable<DatabaseNotes>> getAllNotes() async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
-    final notes = await db.query(
-      notesTable
-    );
+    final notes = await db.query(notesTable);
     return notes.map((noteRow) => DatabaseNotes.fromRow(noteRow)).toList();
   }
 
@@ -78,7 +81,7 @@ class NotesService {
       notesTable,
       limit: 1,
       where: 'id = ?',
-      whereArgs: [id]
+      whereArgs: [id],
     );
     if (notes.isEmpty) {
       throw CouldNotFindNote();
@@ -93,21 +96,21 @@ class NotesService {
 
   Future<int> deleteAllNotes() async {
     await _ensureDbIsOpen();
-    final  db = _getDatabaseOrThrow();
+    final db = _getDatabaseOrThrow();
     final numberOfDeletions = await db.delete(notesTable);
     _notes = [];
     _notesStreamController.add(_notes);
     return numberOfDeletions;
   }
 
-  // this function will delete a note from the database based on the id 
+  // this function will delete a note from the database based on the id
   Future<void> deleteNote({required int id}) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final deleteCount = await db.delete(
       notesTable,
       where: 'id = ?',
-      whereArgs: [id]
+      whereArgs: [id],
     );
     // if deleteCount is 0, it means that either the note was not found or there was an error during deletion.
     if (deleteCount == 0) {
@@ -116,7 +119,8 @@ class NotesService {
       _notes.removeWhere((note) => note.id == id);
       _notesStreamController.add(_notes);
     }
-  }  // this function will create a new note in the database for the given user.
+  } // this function will create a new note in the database for the given user.
+
   Future<DatabaseNotes> createNotes({required DatabaseUser owner}) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
@@ -128,19 +132,16 @@ class NotesService {
       throw CouldNotFindUser();
     }
     const text = '';
-    final noteId = await db.insert(
-      notesTable,
-      {
-        userIdColumn: owner.id,
-        textColumn: text,
-        isSyncedWithCloudColumn: 1
-      }
-    );
+    final noteId = await db.insert(notesTable, {
+      userIdColumn: owner.id,
+      textColumn: text,
+      isSyncedWithCloudColumn: 1,
+    });
     final note = DatabaseNotes(
       id: noteId,
       userId: owner.id,
       text: text,
-      isSyncedWithCloud: true
+      isSyncedWithCloud: true,
     );
     _notes.add(note);
     _notesStreamController.add(_notes);
@@ -157,7 +158,7 @@ class NotesService {
       userTable,
       limit: 1,
       where: 'email = ?',
-      whereArgs: [email.toLowerCase()]
+      whereArgs: [email.toLowerCase()],
     );
     if (result.isEmpty) {
       throw CouldNotFindUser();
@@ -165,7 +166,7 @@ class NotesService {
       // if the result is not empty, it means we found a user with the given email, we take the first row from the result and convert it to a DatabaseUser object using the fromRow constructor.
       return DatabaseUser.fromRow(result.first);
     }
-  } 
+  }
 
   // this function will create a new user in the database with the given email, it takes the email as a parameter and returns a Future that completes with the created DatabaseUser object when the user is created successfully or throws an exception if there is an error
   Future<DatabaseUser> createUser({required String email}) async {
@@ -176,16 +177,14 @@ class NotesService {
       userTable,
       limit: 1,
       where: 'email = ?',
-      whereArgs: [email.toLowerCase()]
+      whereArgs: [email.toLowerCase()],
     );
     if (result.isNotEmpty) {
       throw UserAlreadyExists();
     }
     // id will hold the id of the newly created user, we use the insert method of the datbase to insert a new row into the user table with the given email
     // the insert method returns the id of the newly created row, which we can use to create a DatabaseUser object to return from this function
-    final id = await db.insert(userTable, {
-      emailColumn: email.toLowerCase()
-    });
+    final id = await db.insert(userTable, {emailColumn: email.toLowerCase()});
     // we return a new DatabaseUser object with the id and email of the created user, this will be the result of the Future returned by this function when it completes successfully
     return DatabaseUser(id: id, email: email);
   }
@@ -203,13 +202,14 @@ class NotesService {
     final deleteCount = await db.delete(
       userTable,
       where: 'email = ?',
-      whereArgs: [email.toLowerCase()]
+      whereArgs: [email.toLowerCase()],
     );
     // if deleteCount is not 1, it means that either the user was not found or there was an error during deletion, so we throw a CouldNotDeleteUser exception to indicate that we could not delete the user with the given email
     if (deleteCount != 1) {
       throw CouldNotDeleteUser();
     }
   }
+
   // this function will return the reference to the opened database if it is open, otherwise it will throw an exception
   // short answer: this function is a helper function that we use to get the reference to the opened database and ensure that it is open before we try to use it in other functions that perfrom database operations
   Database _getDatabaseOrThrow() {
@@ -230,6 +230,7 @@ class NotesService {
       // empty for now
     }
   }
+
   // async function to open the database, it returns a Future that completes when the database is opened successfully or throws an exception if there is an error
   // we use async and await because opening the database is an asynchronous operation that can take some time, especially if the database file needs to be created or if there are many tables to create
   Future<void> open() async {
@@ -251,9 +252,9 @@ class NotesService {
       final db = await openDatabase(dbPath);
       // assign the opened database to the _db variable
       _db = db;
-        await db.execute(createUserTable);
-        await db.execute(createNoteTable);
-        await _cacheNotes();
+      await db.execute(createUserTable);
+      await db.execute(createNoteTable);
+      await _cacheNotes();
     } on MissingPlatformDirectoryException {
       throw UnableToGetDocumentsDirectory();
     }
@@ -300,14 +301,13 @@ class DatabaseUser {
   // we want to compare DatabaseUser instances only, so we use covariant here
   // we don't want to compare DatabaseUser with other types like String or int...
   bool operator ==(covariant DatabaseUser other) => id == other.id;
-  
+
   @override
   // Generate hashCode based on id
   // We use the id of the note to generate the hashCode, because the id is unique for each note and it is the primary key in the database, so it is a good candidate for generating the hashCode
   // By using the id for hashCode, we ensure that each note has a unique hashCode, which is important for collections like sets or maps that rely on hash codes for storing and retrieving objects efficiently
   // we use id instead of other propreties like text or userId because those propreties can be the same for different notes, but the id will always be unique for each note
   int get hashCode => id.hashCode;
-  
 }
 
 // This class represents a note in the database
@@ -318,25 +318,32 @@ class DatabaseNotes {
   final bool isSyncedWithCloud;
 
   // Constructor for creating a new DatabaseNotes instance
-  DatabaseNotes({required this.id, required this.userId, required this.text, required this.isSyncedWithCloud});
+  DatabaseNotes({
+    required this.id,
+    required this.userId,
+    required this.text,
+    required this.isSyncedWithCloud,
+  });
 
   DatabaseNotes.fromRow(Map<String, Object?> map)
     : id = map[idColumn] as int,
       userId = map[userIdColumn] as int,
       text = map[textColumn] as String,
-      isSyncedWithCloud = (map[isSyncedWithCloudColumn] as int) == 1 ? true : false;
+      isSyncedWithCloud = (map[isSyncedWithCloudColumn] as int) == 1
+          ? true
+          : false;
 
-    // toString method for easy debugging and logging
-    @override
-    String toString() => 'DatabaseNotes, ID = $id, User ID = $userId, Text = $text, Is Synced = $isSyncedWithCloud';
+  // toString method for easy debugging and logging
+  @override
+  String toString() =>
+      'DatabaseNotes, ID = $id, User ID = $userId, Text = $text, Is Synced = $isSyncedWithCloud';
 
+  @override
+  bool operator ==(covariant DatabaseNotes other) => id == other.id;
 
-    @override
-    bool operator ==(covariant DatabaseNotes other) => id == other.id;
-    
-      @override
-      int get hashCode => id.hashCode;
-  }
+  @override
+  int get hashCode => id.hashCode;
+}
 
 // Constants for database configuration and table/column names
 const dbName = 'notes.db';

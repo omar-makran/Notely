@@ -154,6 +154,11 @@ class _NotesViewState extends State<NotesView> {
                               );
                             }
                           },
+                          onTap: (note) {
+                            Navigator.of(
+                              context,
+                            ).pushNamed('/notes/new-note', arguments: note);
+                          },
                         );
                       } else {
                         return const CircularProgressIndicator();
