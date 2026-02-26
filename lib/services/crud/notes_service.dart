@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:mynote/services/crud/crud_exceptions.dart';
+import 'package:mynote/extensions/list/filter.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart'
     show MissingPlatformDirectoryException, getApplicationDocumentsDirectory;
@@ -10,9 +11,18 @@ import 'package:path/path.dart' show join;
 class NotesService {
   Database? _db;
   List<DatabaseNotes> _notes = [];
+  DatabaseUser? _user;
   late final StreamController<List<DatabaseNotes>> _notesStreamController;
 
-  Stream<List<DatabaseNotes>> get allNotes => _notesStreamController.stream;
+  Stream<List<DatabaseNotes>> get allNotes {
+    final user = _user;
+    if (user == null) {
+      throw UserShouldBeSetBeforeReadingAllNotes();
+    }
+    return _notesStreamController.stream.filter(
+      (note) => note.userId == user.id,
+    );
+  }
 
   static final NotesService _shared = NotesService._sharedInstance();
   NotesService._sharedInstance() {
@@ -24,12 +34,21 @@ class NotesService {
   }
   factory NotesService() => _shared;
 
-  Future<DatabaseUser> getOrCreateUser({required String email}) async {
+  Future<DatabaseUser> getOrCreateUser({
+    required String email,
+    bool setAsCurentUsert = true,
+  }) async {
     try {
       final user = await getUser(email: email);
+      if (setAsCurentUsert) {
+        _user = user;
+      }
       return user;
     } on CouldNotFindUser {
       final createdUser = await createUser(email: email);
+      if (setAsCurentUsert) {
+        _user = createdUser;
+      }
       return createdUser;
     } catch (e) {
       rethrow;
@@ -51,10 +70,12 @@ class NotesService {
     // make sure note exists
     await getNote(id: note.id);
     // update DB
-    final updateCount = await db.update(notesTable, {
-      textColumn: text,
-      isSyncedWithCloudColumn: 0,
-    });
+    final updateCount = await db.update(
+      notesTable,
+      {textColumn: text, isSyncedWithCloudColumn: 0},
+      where: 'id = ?',
+      whereArgs: [note.id],
+    );
     if (updateCount == 0) {
       throw CouldNotUpdateNote();
     } else {
