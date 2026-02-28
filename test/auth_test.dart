@@ -33,36 +33,39 @@ void main() {
       expect(provider.currentUser, null);
     });
 
-    test('Should be able to initialize in less than 3 seconds', () async {
-      await provider.initializer();
-      expect(provider.isInitialized, true);
-    },
-        timeout: const Timeout(Duration(seconds: 3))
+    test(
+      'Should be able to initialize in less than 3 seconds',
+      () async {
+        await provider.initializer();
+        expect(provider.isInitialized, true);
+      },
+      timeout: const Timeout(Duration(seconds: 3)),
     );
 
-    test('Create user should delegate to logIn and handle exceptions', () async {
-      await provider.initializer();
-      expect(
+    test(
+      'Create user should delegate to logIn and handle exceptions',
+      () async {
+        await provider.initializer();
+        expect(
           provider.createUser(
             email: 'omarmakran@gmail.com',
             password: 'anypassword',
           ),
-          throwsA(const TypeMatcher<InvalidCredentialAuthException>()));
+          throwsA(const TypeMatcher<InvalidCredentialAuthException>()),
+        );
 
-      final user = await provider.createUser(
-        email: 'foo@bar.com',
-        password: 'anypassword',
-      );
-      expect(provider.currentUser, user);
-      expect(user.isEmailVerified, false);
-    });
+        final user = await provider.createUser(
+          email: 'foo@bar.com',
+          password: 'anypassword',
+        );
+        expect(provider.currentUser, user);
+        expect(user.isEmailVerified, false);
+      },
+    );
 
     test('Logged in user should be able to get verified', () async {
       await provider.initializer();
-      await provider.logIn(
-        email: 'foo@bar.com',
-        password: 'anypassword',
-      );
+      await provider.logIn(email: 'foo@bar.com', password: 'anypassword');
       await provider.sendEmailVerification();
       final user = provider.currentUser;
       expect(user, isNotNull);
@@ -71,19 +74,13 @@ void main() {
 
     test('Should be able to logout and then login again', () async {
       await provider.initializer();
-      await provider.logIn(
-        email: 'email',
-        password: 'password',
-      );
+      await provider.logIn(email: 'email', password: 'password');
       expect(provider.currentUser, isNotNull);
 
       await provider.logOut();
       expect(provider.currentUser, isNull);
 
-      final user = await provider.logIn(
-        email: 'email',
-        password: 'password',
-      );
+      final user = await provider.logIn(email: 'email', password: 'password');
       expect(user, isNotNull);
       expect(provider.currentUser, isNotNull);
     });
@@ -126,13 +123,19 @@ class MockAuthProvider implements AuthProvider {
   }
 
   @override
-  Future<AuthUser> logIn(
-      {required String email, required String password}) async {
+  Future<AuthUser> logIn({
+    required String email,
+    required String password,
+  }) async {
     if (!isInitialized) throw NotInitializedException();
     if (email == 'omarmakran@gmail.com' && password == 'anypassword') {
       throw InvalidCredentialAuthException();
     }
-    const user = AuthUser(isEmailVerified: false, email: 'omarmakran@gmail.com');
+    const user = AuthUser(
+      isEmailVerified: false,
+      email: 'omarmakran@gmail.com',
+      id: 'mock-user-id',
+    );
     _user = user;
     _authStateController.add(user);
     return user;
@@ -152,7 +155,11 @@ class MockAuthProvider implements AuthProvider {
     if (!isInitialized) throw NotInitializedException();
     final user = _user;
     if (user == null) throw UserNotFoundAuthException();
-    const newUserValid = AuthUser(isEmailVerified: true, email: 'omarmakran@gmail.com');
+    const newUserValid = AuthUser(
+      isEmailVerified: true,
+      email: 'omarmakran@gmail.com',
+      id: 'mock-user-id',
+    );
     _user = newUserValid;
     _authStateController.add(newUserValid);
   }
