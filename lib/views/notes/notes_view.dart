@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mynote/services/auth/auth_service.dart';
-import 'package:mynote/services/crud/notes_service.dart';
+import 'package:mynote/services/cloud/cloud_note.dart';
+import 'package:mynote/services/cloud/firebase_cloud_storage.dart';
 import 'package:mynote/utilities/dialogs/genereic_dialog.dart';
 import 'package:mynote/views/notes/notes_list_view.dart';
 import 'package:share_plus/share_plus.dart';
@@ -20,12 +21,12 @@ class NotesView extends StatefulWidget {
 }
 
 class _NotesViewState extends State<NotesView> {
-  late final NotesService _notesService;
-  String get userEmail => AuthService.firebase().currentUser!.email;
+  late final FirebaseCloudStorage _notesService;
+  String get userId => AuthService.firebase().currentUser!.id;
 
   @override
   void initState() {
-    _notesService = NotesService();
+    _notesService = FirebaseCloudStorage();
     super.initState();
   }
 
@@ -111,63 +112,51 @@ class _NotesViewState extends State<NotesView> {
               onPressed: _navigateToNewNote,
               child: Icon(Icons.add),
             ),
-      body: FutureBuilder(
-        future: _notesService.getOrCreateUser(email: userEmail),
+      body: StreamBuilder(
+        stream: _notesService.allNotes(ownerUserId: userId),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
-            case ConnectionState.done:
-              return StreamBuilder(
-                stream: _notesService.allNotes,
-                builder: (context, snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.waiting:
-                    case ConnectionState.active:
-                      if (snapshot.hasData) {
-                        final allNotes = snapshot.data as List<DatabaseNotes>;
-                        return NotesListView(
-                          notes: allNotes,
-                          onDeleteNote: (note) async {
-                            await _notesService.deleteNote(id: note.id);
-                          },
-                          onShareNote: (DatabaseNotes note) async {
-                            await SharePlus.instance.share(
-                              ShareParams(text: note.text),
-                            );
-                          },
-                          onCopyNote: (DatabaseNotes note) async {
-                            await Clipboard.setData(
-                              ClipboardData(text: note.text),
-                            );
-                            if (!mounted) return;
-                            if (Platform.isIOS) {
-                              showGenirecDialog(
-                                context: context,
-                                title: 'Copied',
-                                content: 'Copied to clipboard!',
-                                optionsBuilder: () => {'Ok': null},
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Copied to clipboard!'),
-                                ),
-                              );
-                            }
-                          },
-                          onTap: (note) {
-                            Navigator.of(
-                              context,
-                            ).pushNamed('/notes/new-note', arguments: note);
-                          },
-                        );
-                      } else {
-                        return const CircularProgressIndicator();
-                      }
-                    default:
-                      return const CircularProgressIndicator();
-                  }
-                },
-              );
+            case ConnectionState.waiting:
+            case ConnectionState.active:
+              if (snapshot.hasData) {
+                final allNotes = snapshot.data as Iterable<CloudNote>;
+                return NotesListView(
+                  notes: allNotes,
+                  onDeleteNote: (note) async {
+                    await _notesService.deleteNotes(
+                      documentId: note.documentId,
+                    );
+                  },
+                  onShareNote: (CloudNote note) async {
+                    await SharePlus.instance.share(
+                      ShareParams(text: note.text),
+                    );
+                  },
+                  onCopyNote: (CloudNote note) async {
+                    await Clipboard.setData(ClipboardData(text: note.text));
+                    if (!mounted) return;
+                    if (Platform.isIOS) {
+                      showGenirecDialog(
+                        context: context,
+                        title: 'Copied',
+                        content: 'Copied to clipboard!',
+                        optionsBuilder: () => {'Ok': null},
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Copied to clipboard!')),
+                      );
+                    }
+                  },
+                  onTap: (note) {
+                    Navigator.of(
+                      context,
+                    ).pushNamed('/notes/new-note', arguments: note);
+                  },
+                );
+              } else {
+                return const CircularProgressIndicator();
+              }
             default:
               return const CircularProgressIndicator();
           }
