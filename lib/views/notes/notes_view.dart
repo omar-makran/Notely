@@ -2,7 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynote/services/auth/auth_service.dart';
+import 'package:mynote/services/auth/bloc/auth_bloc.dart';
+import 'package:mynote/services/auth/bloc/auth_event.dart';
 import 'package:mynote/services/cloud/cloud_note.dart';
 import 'package:mynote/services/cloud/firebase_cloud_storage.dart';
 import 'package:mynote/utilities/dialogs/genereic_dialog.dart';
@@ -34,7 +37,7 @@ class _NotesViewState extends State<NotesView> {
     final shouldLogout = await showLogOutDialog(context);
     if (shouldLogout) {
       if (!mounted) return;
-      await AuthService.firebase().logOut();
+      context.read<AuthBloc>().add(const AuthEventLogOut());
     }
   }
 
@@ -133,9 +136,11 @@ class _NotesViewState extends State<NotesView> {
                     );
                   },
                   onCopyNote: (CloudNote note) async {
+                    final messenger = ScaffoldMessenger.of(context);
                     await Clipboard.setData(ClipboardData(text: note.text));
                     if (!mounted) return;
                     if (Platform.isIOS) {
+                      if (!context.mounted) return;
                       showGenirecDialog(
                         context: context,
                         title: 'Copied',
@@ -143,7 +148,7 @@ class _NotesViewState extends State<NotesView> {
                         optionsBuilder: () => {'Ok': null},
                       );
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      messenger.showSnackBar(
                         const SnackBar(content: Text('Copied to clipboard!')),
                       );
                     }
