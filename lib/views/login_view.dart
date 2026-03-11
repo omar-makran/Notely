@@ -4,6 +4,7 @@ import 'package:mynote/services/auth/bloc/auth_bloc.dart';
 import 'package:mynote/services/auth/bloc/auth_event.dart';
 import 'package:mynote/services/auth/bloc/auth_state.dart';
 import 'package:mynote/utilities/dialogs/error_dialog.dart';
+import 'package:mynote/utilities/dialogs/loading_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -16,6 +17,7 @@ class _LoginViewState extends State<LoginView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
   bool _obscureText = true;
+  CloseDialog? _closeDialogHandle;
 
   @override
   void initState() {
@@ -39,11 +41,19 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is AuthStateLoggedOut && state.exception != null) {
-          showErrorDialog(
-            context,
-            'We could not log you in. Please make sure you have entered the correct credentials and try again.',
-          );
+        if (state is AuthStateLoggedOut) {
+          if (state.isLoading) {
+            _closeDialogHandle = showLoadingDialog(context: context);
+          } else {
+            _closeDialogHandle?.call();
+            _closeDialogHandle = null;
+          }
+          if (state.exception != null) {
+            showErrorDialog(
+              context,
+              'We could not register you. Please make sure you have entered the correct credentials and try again.',
+            );
+          }
         }
       },
       child: Scaffold(
@@ -103,7 +113,7 @@ class _LoginViewState extends State<LoginView> {
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamed('/register/');
+                  context.read<AuthBloc>().add(const AuthEventShouldRegister());
                 },
                 child: const Text('Not registered yet? Register here!'),
               ),

@@ -60,4 +60,3 @@ Future<T?> showGenirecDialog<T>({
     );
   }
 }
-

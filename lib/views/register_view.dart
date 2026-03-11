@@ -39,7 +39,7 @@ class _RegisterViewState extends State<RegisterView> {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is AuthStateLoggedOut && state.exception != null) {
+        if (state is AuthStateRegistering && state.exception != null) {
           showErrorDialog(
             context,
             'We could not register you. Please make sure you have entered the correct credentials and try again.',
@@ -103,7 +103,7 @@ class _RegisterViewState extends State<RegisterView> {
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  context.read<AuthBloc>().add(const AuthEventLogOut());
                 },
                 child: const Text('Already have an account? Login here!'),
               ),

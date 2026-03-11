@@ -21,29 +21,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'myNote',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
-        useMaterial3: true,
-      ),
-      home: BlocProvider(
-        create: (context) {
-          final provider = AuthService.firebase();
-          AuthBloc authBloc = AuthBloc(provider);
-          authBloc.add(const AuthEventInitialize());
-          return authBloc;
-        },
-        child: const HomePage(),
-      ),
-      routes: {
-        '/login/': (context) => const LoginView(),
-        '/register/': (context) => const RegisterView(),
-        '/verify-email/': (context) => const VerifyEmailView(),
-        '/notes/': (context) => const NotesView(),
-        '/notes/new-note': (context) => const CreateUpdateNoteView(),
+    return BlocProvider(
+      create: (context) {
+        final provider = AuthService.firebase();
+        AuthBloc authBloc = AuthBloc(provider);
+        authBloc.add(const AuthEventInitialize());
+        return authBloc;
       },
-      debugShowCheckedModeBanner: false,
+      child: MaterialApp(
+        title: 'myNote',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+          useMaterial3: true,
+        ),
+        home: const HomePage(),
+        routes: {'/notes/new-note': (context) => const CreateUpdateNoteView()},
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }
@@ -61,6 +55,8 @@ class HomePage extends StatelessWidget {
           return const VerifyEmailView();
         } else if (state is AuthStateLoggedOut) {
           return const LoginView();
+        } else if (state is AuthStateRegistering) {
+          return const RegisterView();
         } else if (state is AuthStateUninitialized) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
