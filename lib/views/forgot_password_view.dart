@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynote/services/auth/bloc/auth_bloc.dart';
@@ -15,6 +17,27 @@ class ForgotPasswordView extends StatefulWidget {
 
 class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   final TextEditingController _email = TextEditingController();
+  Timer? _cooldownTimer;
+  int _secondsRemaining = 0;
+  bool _canSend = true;
+
+  void _startCooldown() {
+    setState(() {
+      _canSend = false;
+      _secondsRemaining = 30;
+    });
+    _cooldownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        _secondsRemaining--;
+      });
+      if (_secondsRemaining <= 0) {
+        timer.cancel();
+        setState(() {
+          _canSend = true;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +45,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
       listener: (context, state) {
         if (state is AuthStateForgotPassword) {
           if (state.hasSentEmail) {
+            _startCooldown();
             showPasswordResetEmailSentDialog(
               context,
               'Check your inbox mailbox for a password reset link.',
@@ -47,13 +71,19 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
               decoration: InputDecoration(hintText: 'Email address'),
             ),
             TextButton(
-              onPressed: () {
-                final email = _email.text;
-                context.read<AuthBloc>().add(
-                  AuthEventForgotPassword(email: email),
-                );
-              },
-              child: Text('Send password reset email'),
+              onPressed: _canSend
+                  ? () {
+                      final email = _email.text;
+                      context.read<AuthBloc>().add(
+                        AuthEventForgotPassword(email: email),
+                      );
+                    }
+                  : null,
+              child: Text(
+                _canSend
+                    ? 'Send password reset email'
+                    : 'Resend in $_secondsRemaining s',
+              ),
             ),
             TextButton(
               onPressed: () {
@@ -65,5 +95,12 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _cooldownTimer?.cancel();
+    super.dispose();
   }
 }
