@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mynote/services/auth/auth_exceptions.dart';
 import 'package:mynote/services/auth/bloc/auth_bloc.dart';
 import 'package:mynote/services/auth/bloc/auth_event.dart';
 import 'package:mynote/services/auth/bloc/auth_state.dart';
@@ -40,10 +41,13 @@ class _LoginViewState extends State<LoginView> {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthStateLoggedOut && state.exception != null) {
-          showErrorDialog(
-            context,
-            'We could not register you. Please make sure you have entered the correct credentials and try again.',
-          );
+          if (state.exception is InvalidCredentialAuthException) {
+            showErrorDialog(context, 'Wrong email or password');
+          } else if (state.exception is GenericAuthException) {
+            showErrorDialog(context, 'An error occurred');
+          } else {
+            showErrorDialog(context, 'Authentication error');
+          }
         }
       },
       child: Scaffold(
@@ -100,6 +104,14 @@ class _LoginViewState extends State<LoginView> {
                   );
                 },
                 child: const Text('Login'),
+              ),
+              TextButton(
+                onPressed: () {
+                  context.read<AuthBloc>().add(
+                    AuthEventForgotPassword(),
+                  );
+                },
+                child: Text("Forgotten Password?"),
               ),
               TextButton(
                 onPressed: () {

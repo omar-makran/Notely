@@ -52,7 +52,7 @@ class _RegisterViewState extends State<RegisterView> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
                 controller: _email,
@@ -63,6 +63,7 @@ class _RegisterViewState extends State<RegisterView> {
                   border: OutlineInputBorder(),
                   hintText: 'Email',
                 ),
+                autofocus: true,
               ),
               const SizedBox(height: 16.0),
               TextField(
