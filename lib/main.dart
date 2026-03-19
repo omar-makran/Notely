@@ -11,6 +11,7 @@ import 'package:mynote/views/login_view.dart';
 import 'package:mynote/views/notes/create_update_note.dart';
 import 'package:mynote/views/notes/notes_view.dart';
 import 'package:mynote/views/register_view.dart';
+import 'package:mynote/views/splash_screen_view.dart';
 import 'package:mynote/views/verify_email_view.dart';
 
 void main() {
@@ -70,9 +71,7 @@ class HomePage extends StatelessWidget {
         } else if (state is AuthStateRegistering) {
           return const RegisterView();
         } else if (state is AuthStateUninitialized) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const SplashScreenView();
         } else if (state is AuthStateForgotPassword) {
           return const ForgotPasswordView();
         } else {

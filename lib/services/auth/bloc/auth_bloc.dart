@@ -8,6 +8,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(this.provider) : super(const AuthStateUninitialized()) {
     on<AuthEventInitialize>((event, emit) async {
       await provider.initializer();
+      await Future.delayed(const Duration(seconds: 3));
       final currentUser = provider.currentUser;
       if (currentUser == null) {
         emit(const AuthStateLoggedOut());
@@ -58,7 +59,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthEventSendEmailVerification>((event, emit) async {
       try {
         await provider.sendEmailVerification();
-        emit(state);   
+        emit(state);
       } catch (e) {
         emit(AuthStateLoggedOut(exception: e as Exception));
       }
