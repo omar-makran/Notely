@@ -41,7 +41,7 @@ class LoadingScreen {
                 maxHeight: MediaQuery.of(context).size.height * 0.8,
               ),
               decoration: BoxDecoration(
-                color: Colors.amber,
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Padding(

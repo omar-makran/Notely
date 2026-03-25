@@ -124,7 +124,7 @@ class _SplashScreenViewState extends State<SplashScreenView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -182,7 +182,7 @@ class _SplashScreenViewState extends State<SplashScreenView>
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w700,
-                    color: Colors.orange.shade700,
+                    color: Theme.of(context).colorScheme.primary,
                     letterSpacing: 1.2,
                   ),
                 ),
