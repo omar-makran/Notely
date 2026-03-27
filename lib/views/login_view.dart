@@ -5,6 +5,7 @@ import 'package:mynote/services/auth/bloc/auth_bloc.dart';
 import 'package:mynote/services/auth/bloc/auth_event.dart';
 import 'package:mynote/services/auth/bloc/auth_state.dart';
 import 'package:mynote/utilities/dialogs/error_dialog.dart';
+import 'package:mynote/widgets/auth_hero_section.dart';
 import 'package:mynote/widgets/styled_text_field.dart';
 
 class LoginView extends StatefulWidget {
@@ -35,66 +36,6 @@ class _LoginViewState extends State<LoginView> {
     _email.dispose();
     _password.dispose();
     super.dispose();
-  }
-
-  Widget _buildHeroSection(BuildContext context) {
-    // ── HERO SECTION ──
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.45,
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFFF9500), Color(0xFFFF6B00), Color(0xFFE85D04)],
-          stops: [0.0, 0.5, 1.0],
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned(
-              left: 24,
-              top: 0,
-              bottom: 0,
-              width: MediaQuery.of(context).size.width * 0.40,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Notely',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Your notes,\nanywhere.',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withAlpha(204),
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              right: 8,
-              bottom: -10,
-              child: Image.asset(
-                'assets/icon/girl.png',
-                height: MediaQuery.of(context).size.height * 0.35,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildLoginSheet(BuildContext context) {
@@ -236,7 +177,7 @@ class _LoginViewState extends State<LoginView> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         body: SingleChildScrollView(
           child: Column(
-            children: [_buildHeroSection(context), _buildLoginSheet(context)],
+            children: [AuthHeroSection(), _buildLoginSheet(context)],
           ),
         ),
       ),
