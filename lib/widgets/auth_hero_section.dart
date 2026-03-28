@@ -4,11 +4,13 @@ class AuthHeroSection extends StatelessWidget {
   final String title;
   final String tagline;
   final String imagePath;
+  final double size;
   const AuthHeroSection({
     super.key,
     this.title = 'Notely',
     this.tagline = 'Your notes,\nanywhere.',
     this.imagePath = 'assets/icon/girl.png',
+    this.size = -10,
   });
 
   @override
@@ -58,7 +60,7 @@ class AuthHeroSection extends StatelessWidget {
             ),
             Positioned(
               right: 8,
-              bottom: -10,
+              bottom: size,
               child: Image.asset(
                 imagePath,
                 height: MediaQuery.of(context).size.height * 0.35,

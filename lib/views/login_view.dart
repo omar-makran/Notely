@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynote/services/auth/auth_exceptions.dart';
 import 'package:mynote/services/auth/bloc/auth_bloc.dart';
@@ -39,121 +40,129 @@ class _LoginViewState extends State<LoginView> {
   }
 
   Widget _buildLoginSheet(BuildContext context) {
-    return Transform.translate(
-      offset: const Offset(0, -30),
-      child: Container(
-        width: double.infinity,
-        constraints: BoxConstraints(
-          minHeight: MediaQuery.of(context).size.height * 0.60 + 30,
-        ),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(32),
-            topRight: Radius.circular(32),
+    return SensitiveContent(
+      sensitivity: ContentSensitivity.sensitive,
+      child: Transform.translate(
+        offset: const Offset(0, -30),
+        child: Container(
+          width: double.infinity,
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height * 0.60 + 30,
           ),
-        ),
-        padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Sign In',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(32),
+              topRight: Radius.circular(32),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Welcome back!',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 40),
-            StyledTextField(
-              controller: _email,
-              icon: Icons.email_outlined,
-              hint: 'Email',
-            ),
-            const SizedBox(height: 16.0),
-            StyledTextField(
-              controller: _password,
-              icon: Icons.lock_outlined,
-              hint: 'Password',
-              obscureText: _obscureText,
-              suffixIcon: _password.text.isNotEmpty
-                  ? IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _obscureText = !_obscureText;
-                        });
-                      },
-                      icon: Icon(
-                        _obscureText ? Icons.visibility_off : Icons.visibility,
-                      ),
-                    )
-                  : null,
-            ),
-            const SizedBox(height: 24.0),
-            FilledButton(
-              onPressed: () {
-                context.read<AuthBloc>().add(
-                  AuthEventLogIn(email: _email.text, password: _password.text),
-                );
-              },
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Sign In',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              child: const Text(
-                'Login',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              const SizedBox(height: 8),
+              Text(
+                'Welcome back!',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
+              const SizedBox(height: 40),
+              StyledTextField(
+                controller: _email,
+                icon: Icons.email_outlined,
+                hint: 'Email',
+              ),
+              const SizedBox(height: 16.0),
+              StyledTextField(
+                controller: _password,
+                icon: Icons.lock_outlined,
+                hint: 'Password',
+                obscureText: _obscureText,
+                suffixIcon: _password.text.isNotEmpty
+                    ? IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
+                        icon: Icon(
+                          _obscureText
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                      )
+                    : null,
+              ),
+              const SizedBox(height: 24.0),
+              FilledButton(
                 onPressed: () {
-                  context.read<AuthBloc>().add(AuthEventForgotPassword());
+                  context.read<AuthBloc>().add(
+                    AuthEventLogIn(
+                      email: _email.text,
+                      password: _password.text,
+                    ),
+                  );
                 },
-                child: Text(
-                  "Forgotten Password?",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 56),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                ),
+                child: const Text(
+                  'Login',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Don't have an account? ",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    context.read<AuthBloc>().add(
-                      const AuthEventShouldRegister(),
-                    );
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    context.read<AuthBloc>().add(AuthEventForgotPassword());
                   },
                   child: Text(
-                    'Sign Up',
+                    "Forgotten Password?",
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-              ],
-            ),
-          ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Don't have an account? ",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      context.read<AuthBloc>().add(
+                        const AuthEventShouldRegister(),
+                      );
+                    },
+                    child: Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

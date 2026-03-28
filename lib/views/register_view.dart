@@ -4,7 +4,9 @@ import 'package:mynote/services/auth/bloc/auth_bloc.dart';
 import 'package:mynote/services/auth/bloc/auth_event.dart';
 import 'package:mynote/services/auth/bloc/auth_state.dart';
 import 'package:mynote/utilities/dialogs/error_dialog.dart';
+import 'package:mynote/utilities/password_strength.dart';
 import 'package:mynote/widgets/auth_hero_section.dart';
+import 'package:mynote/widgets/password_strength_bar.dart';
 import 'package:mynote/widgets/styled_text_field.dart';
 
 class RegisterView extends StatefulWidget {
@@ -17,14 +19,23 @@ class RegisterView extends StatefulWidget {
 class _RegisterViewState extends State<RegisterView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
+  late final TextEditingController _confirmPassword;
   bool _obscureText = true;
+  bool _obscureTextConfirm = true;
 
   @override
   void initState() {
     _email = TextEditingController();
     _password = TextEditingController();
+    _confirmPassword = TextEditingController();
 
     _password.addListener(() {
+      setState(() {});
+    });
+    _confirmPassword.addListener(() {
+      setState(() {});
+    });
+    _email.addListener(() {
       setState(() {});
     });
     super.initState();
@@ -34,6 +45,7 @@ class _RegisterViewState extends State<RegisterView> {
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _confirmPassword.dispose();
     super.dispose();
   }
 
@@ -52,7 +64,12 @@ class _RegisterViewState extends State<RegisterView> {
             topRight: Radius.circular(32),
           ),
         ),
-        padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+        padding: EdgeInsets.fromLTRB(
+          24,
+          32,
+          24,
+          24 + MediaQuery.of(context).padding.bottom,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -95,16 +112,54 @@ class _RegisterViewState extends State<RegisterView> {
                     )
                   : null,
             ),
+            if (_password.text.isNotEmpty)
+              PasswordStrengthBar(strength: calculateStrength(_password.text)),
+            const SizedBox(height: 16.0),
+            StyledTextField(
+              controller: _confirmPassword,
+              icon: Icons.lock_clock_outlined,
+              hint: 'Confirm Password',
+              obscureText: _obscureTextConfirm,
+              suffixIcon: _confirmPassword.text.isNotEmpty
+                  ? IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _obscureTextConfirm = !_obscureTextConfirm;
+                        });
+                      },
+                      icon: Icon(
+                        _obscureTextConfirm
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                    )
+                  : null,
+            ),
+            if (_confirmPassword.text.isNotEmpty &&
+                _confirmPassword.text != _password.text)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  "Password don't match",
+                  style: TextStyle(color: Colors.red, fontSize: 12),
+                ),
+              ),
             const SizedBox(height: 24.0),
             FilledButton(
-              onPressed: () {
-                context.read<AuthBloc>().add(
-                  AuthEventRegister(
-                    email: _email.text,
-                    password: _password.text,
-                  ),
-                );
-              },
+              onPressed:
+                  (_email.text.isNotEmpty &&
+                      _password.text == _confirmPassword.text &&
+                      calculateStrength(_password.text) !=
+                          PasswordStrength.weak)
+                  ? () {
+                      context.read<AuthBloc>().add(
+                        AuthEventRegister(
+                          email: _email.text,
+                          password: _password.text,
+                        ),
+                      );
+                    }
+                  : null,
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(
@@ -128,9 +183,7 @@ class _RegisterViewState extends State<RegisterView> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    context.read<AuthBloc>().add(
-                      const AuthEventLogOut(),
-                    );
+                    context.read<AuthBloc>().add(const AuthEventLogOut());
                   },
                   child: Text(
                     'Sign In',
@@ -164,7 +217,12 @@ class _RegisterViewState extends State<RegisterView> {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              AuthHeroSection(title: 'Notely', tagline: 'Start capturing\nyour ideas.', imagePath: 'assets/icon/boy.png',),
+              AuthHeroSection(
+                title: 'Notely',
+                tagline: 'Start capturing\nyour ideas.',
+                imagePath: 'assets/icon/boy.png',
+                size: -33,
+              ),
               _buildRegisterSheet(context),
             ],
           ),
