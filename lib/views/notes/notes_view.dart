@@ -123,6 +123,42 @@ class _NotesViewState extends State<NotesView> {
             case ConnectionState.active:
               if (snapshot.hasData) {
                 final allNotes = snapshot.data as Iterable<CloudNote>;
+                if (allNotes.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.note_add_outlined,
+                          size: 80,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withAlpha(120),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No notes yet',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tap + to create your first note',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
                 return NotesListView(
                   notes: allNotes,
                   onDeleteNote: (note) async {
@@ -160,10 +196,24 @@ class _NotesViewState extends State<NotesView> {
                   },
                 );
               } else {
-                return const CircularProgressIndicator();
+                return Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                );
               }
             default:
-              return const CircularProgressIndicator();
+              return Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              );
           }
         },
       ),

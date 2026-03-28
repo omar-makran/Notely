@@ -146,12 +146,23 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
               if (snapshot.hasData) {
                 _note = snapshot.data as CloudNote;
                 _setUpTextControllerListner();
-                return TextField(
-                  controller: _textConteroller,
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    hintText: "I have a meeting ...",
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: TextField(
+                    controller: _textConteroller,
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    decoration: InputDecoration(
+                      hintText: 'Start writing your note...',
+                      border: InputBorder.none,
+                      hintStyle: Theme.of(context).textTheme.bodyLarge
+                          ?.copyWith(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
                   ),
                 );
               } else {

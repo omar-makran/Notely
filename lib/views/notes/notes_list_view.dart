@@ -28,42 +28,76 @@ class NotesListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final notesList = notes.toList();
     return ListView.builder(
-      itemCount: notes.toList().length,
+      itemCount: notesList.length,
+      padding: const EdgeInsets.symmetric(vertical: 8),
       itemBuilder: (context, index) {
-        final note = notes.toList()[index];
-        return ListTile(
-          onTap: () {
-            onTap(note);
-          },
-          onLongPress: () {
-            onCopyNote(note);
-          },
-          title: Text(
-            note.text,
-            maxLines: 1,
-            softWrap: true,
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                onPressed: () async {
-                  final shouldDelete = await showDeleteDialog(context);
-                  if (shouldDelete) {
-                    onDeleteNote(note);
-                  }
-                },
-                icon: const Icon(Icons.delete),
+        final note = notesList[index];
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: Theme.of(context).colorScheme.outline.withAlpha(50),
               ),
-              IconButton(
-                onPressed: () async {
-                  onShareNote(note);
-                },
-                icon: Icon(Platform.isIOS ? CupertinoIcons.share : Icons.share),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () => onTap(note),
+              onLongPress: () => onCopyNote(note),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      note.text,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      note.text,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          onPressed: () async {
+                            final shouldDelete = await showDeleteDialog(
+                              context,
+                            );
+                            if (shouldDelete) {
+                              onDeleteNote(note);
+                            }
+                          },
+                          icon: const Icon(Icons.delete_outline, size: 20),
+                        ),
+                        IconButton(
+                          onPressed: () => onShareNote(note),
+                          icon: Icon(
+                            Platform.isIOS ? CupertinoIcons.share : Icons.share,
+                            size: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         );
       },
