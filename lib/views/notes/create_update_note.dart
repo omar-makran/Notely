@@ -158,7 +158,14 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
                 return const Center(child: Text('Could not create note.'));
               }
             default:
-              return const CircularProgressIndicator();
+              return Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              );
           }
         },
       ),

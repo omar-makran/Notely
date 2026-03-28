@@ -34,36 +34,57 @@ class LoadingScreen {
       builder: (context) {
         return Material(
           type: MaterialType.transparency,
-          child: Center(
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.8,
-                maxHeight: MediaQuery.of(context).size.height * 0.8,
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 10),
-                    const CircularProgressIndicator(),
-                    const SizedBox(height: 20),
-                    StreamBuilder<String>(
-                      stream: textStream.stream,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return Text(snapshot.data!);
-                        } else {
-                          return Container();
-                        }
-                      },
+          child: Container(
+            color: Colors.black.withAlpha(100),
+            child: Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 200, minWidth: 200),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(40),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
                     ),
                   ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 8),
+                      CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      StreamBuilder<String>(
+                        stream: textStream.stream,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Text(
+                              snapshot.data!,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
+                                  ),
+                            );
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
