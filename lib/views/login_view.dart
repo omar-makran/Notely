@@ -186,7 +186,7 @@ class _LoginViewState extends State<LoginView> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         body: SingleChildScrollView(
           child: Column(
-            children: [AuthHeroSection(), _buildLoginSheet(context)],
+            children: [AuthHeroSection(imageHeight: 0.45, positionSize: -22,), _buildLoginSheet(context)],
           ),
         ),
       ),

@@ -7,6 +7,8 @@ import 'package:mynote/services/auth/bloc/auth_event.dart';
 import 'package:mynote/services/auth/bloc/auth_state.dart';
 import 'package:mynote/utilities/dialogs/error_dialog.dart';
 import 'package:mynote/utilities/dialogs/password_reset_email_sent_dialog.dart';
+import 'package:mynote/widgets/auth_hero_section.dart';
+import 'package:mynote/widgets/styled_text_field.dart';
 
 class ForgotPasswordView extends StatefulWidget {
   const ForgotPasswordView({super.key});
@@ -16,10 +18,19 @@ class ForgotPasswordView extends StatefulWidget {
 }
 
 class _ForgotPasswordViewState extends State<ForgotPasswordView> {
-  final TextEditingController _email = TextEditingController();
+  late final TextEditingController _email;
   Timer? _cooldownTimer;
   int _secondsRemaining = 0;
   bool _canSend = true;
+
+  @override
+  void initState() {
+    _email = TextEditingController();
+    _email.addListener(() {
+      setState(() {});
+    });
+    super.initState();
+  }
 
   void _startCooldown() {
     setState(() {
@@ -37,6 +48,89 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
         });
       }
     });
+  }
+
+  Widget _buildForgotSheet(BuildContext context) {
+    return Transform.translate(
+      offset: Offset(0, -30),
+      child: Container(
+        width: double.infinity,
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height * 0.60 + 30,
+        ),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Reset Password',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Enter your email to receive a reset link.',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            SizedBox(height: 40),
+            StyledTextField(
+              controller: _email,
+              icon: Icons.email_outlined,
+              hint: 'Email',
+            ),
+            SizedBox(height: 24),
+            FilledButton(
+              onPressed: (_canSend && _email.text.isNotEmpty)
+                  ? () {
+                      context.read<AuthBloc>().add(
+                        AuthEventForgotPassword(email: _email.text),
+                      );
+                    }
+                  : null,
+              child: Text(
+                _canSend ? 'Send Reset Link' : 'Resend in $_secondsRemaining s',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+            const SizedBox(height: 24.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Remember your password? ",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    context.read<AuthBloc>().add(const AuthEventLogOut());
+                  },
+                  child: Text(
+                    'Sign In',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -59,39 +153,19 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Forgot Password')),
-        body: Column(
-          children: [
-            Text('Enter your email to receive a password reset link.'),
-            TextField(
-              controller: _email,
-              keyboardType: TextInputType.emailAddress,
-              autocorrect: false,
-              enableSuggestions: false,
-              decoration: InputDecoration(hintText: 'Email address'),
-            ),
-            TextButton(
-              onPressed: _canSend
-                  ? () {
-                      final email = _email.text;
-                      context.read<AuthBloc>().add(
-                        AuthEventForgotPassword(email: email),
-                      );
-                    }
-                  : null,
-              child: Text(
-                _canSend
-                    ? 'Send password reset email'
-                    : 'Resend in $_secondsRemaining s',
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              AuthHeroSection(
+                tagline: 'Forgot your\npassword?',
+                imagePath: 'assets/icon/girl_2.png',
+                positionSize: 3,
+                imageHeight: 0.35,
               ),
-            ),
-            TextButton(
-              onPressed: () {
-                context.read<AuthBloc>().add(const AuthEventLogOut());
-              },
-              child: Text('Back to login'),
-            ),
-          ],
+              _buildForgotSheet(context),
+            ],
+          ),
         ),
       ),
     );
