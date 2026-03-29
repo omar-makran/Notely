@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:mynote/services/cloud/cloud_note.dart';
 import 'package:mynote/utilities/dialogs/show_delete_dialog.dart';
 
@@ -35,66 +36,110 @@ class NotesListView extends StatelessWidget {
       itemBuilder: (context, index) {
         final note = notesList[index];
         return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: Theme.of(context).colorScheme.outline.withAlpha(50),
-              ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Slidable(
+            key: Key(note.documentId),
+            endActionPane: ActionPane(
+              motion: const BehindMotion(),
+              extentRatio: 0.3,
+              children: [
+                CustomSlidableAction(
+                  onPressed: (context) => onShareNote(note),
+                  backgroundColor: Colors.transparent,
+                  padding: EdgeInsets.zero,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Share button
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: const BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Platform.isIOS ? CupertinoIcons.share : Icons.share,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                CustomSlidableAction(
+                  onPressed: (context) async {
+                    final shouldDelete = await showDeleteDialog(context);
+                    if (shouldDelete) {
+                      onDeleteNote(note);
+                    }
+                  },
+                  backgroundColor: Colors.transparent,
+                  padding: EdgeInsets.zero,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Delete button
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () => onTap(note),
-              onLongPress: () => onCopyNote(note),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      note.text,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      note.text,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+            child: SizedBox(
+              width: double.infinity,
+              child: Card(
+                elevation: 0,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () => onTap(note),
+                  onLongPress: () => onCopyNote(note),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        IconButton(
-                          onPressed: () async {
-                            final shouldDelete = await showDeleteDialog(
-                              context,
-                            );
-                            if (shouldDelete) {
-                              onDeleteNote(note);
-                            }
-                          },
-                          icon: const Icon(Icons.delete_outline, size: 20),
+                        Text(
+                          note.text.split('\n').first,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
-                        IconButton(
-                          onPressed: () => onShareNote(note),
-                          icon: Icon(
-                            Platform.isIOS ? CupertinoIcons.share : Icons.share,
-                            size: 20,
+                        if (note.text.contains('\n') ||
+                            note.text.length > 40) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            note.text,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
