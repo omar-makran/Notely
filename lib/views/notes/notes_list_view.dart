@@ -43,7 +43,9 @@ class NotesListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final notesList = notes.where((note) => note.text.trim().isNotEmpty).toList();
+    final notesList = notes
+        .where((note) => note.text.trim().isNotEmpty)
+        .toList();
 
     notesList.sort((a, b) {
       final aDate = a.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
@@ -52,131 +54,148 @@ class NotesListView extends StatelessWidget {
       return bDate.compareTo(aDate);
     });
 
-    return ListView.builder(
-      itemCount: notesList.length,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemBuilder: (context, index) {
-        final note = notesList[index];
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Slidable(
-            key: Key(note.documentId),
-            endActionPane: ActionPane(
-              motion: const BehindMotion(),
-              extentRatio: 0.3,
-              children: [
-                CustomSlidableAction(
-                  onPressed: (context) => onShareNote(note),
-                  backgroundColor: Colors.transparent,
-                  padding: EdgeInsets.zero,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: const BoxDecoration(
-                          color: Colors.blue,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Platform.isIOS ? CupertinoIcons.share : Icons.share,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                CustomSlidableAction(
-                  onPressed: (context) async {
-                    final shouldDelete = await showDeleteDialog(context);
-                    if (shouldDelete) {
-                      onDeleteNote(note);
-                    }
-                  },
-                  backgroundColor: Colors.transparent,
-                  padding: EdgeInsets.zero,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.delete_outline,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            child: SizedBox(
-              width: double.infinity,
-              child: Card(
-                elevation: 0,
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () => onTap(note),
-                  onLongPress: () => onCopyNote(note),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+    return SliverPadding(
+      padding: const EdgeInsets.only(
+        bottom: 100,
+        top: 8,
+      ), // Extra padding for safe scrolling past floating buttons
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final note = notesList[index];
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            child: Slidable(
+              key: Key(note.documentId),
+              endActionPane: ActionPane(
+                motion: const BehindMotion(),
+                extentRatio: 0.3,
+                children: [
+                  CustomSlidableAction(
+                    onPressed: (context) => onShareNote(note),
+                    backgroundColor: Colors.transparent,
+                    padding: EdgeInsets.zero,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          note.text.split('\n').first,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: const BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Platform.isIOS ? CupertinoIcons.share : Icons.share,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
-                        if (note.text.contains('\n') ||
-                            note.text.length > 40) ...[
-                          const SizedBox(height: 4),
+                      ],
+                    ),
+                  ),
+                  CustomSlidableAction(
+                    onPressed: (context) async {
+                      final shouldDelete = await showDeleteDialog(context);
+                      if (shouldDelete) {
+                        onDeleteNote(note);
+                      }
+                    },
+                    backgroundColor: Colors.transparent,
+                    padding: EdgeInsets.zero,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                child: Card(
+                  elevation: 0,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withAlpha(120),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withAlpha(40),
+                      width: 1,
+                    ),
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () => onTap(note),
+                    onLongPress: () => onCopyNote(note),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            note.text,
-                            maxLines: 2,
+                            note.text.split('\n').first,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodyMedium
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.2, // Premium tracking
+                                ),
+                          ),
+                          if (note.text.contains('\n') ||
+                              note.text.length > 40) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              note.text,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                    height: 1.4, // Line height for preview text
+                                  ),
+                            ),
+                          ],
+                          const SizedBox(height: 16),
+                          Text(
+                            _formatDate(note.updatedAt),
+                            style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   color: Theme.of(
                                     context,
                                   ).colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
                                 ),
                           ),
                         ],
-                        SizedBox(height: 12),
-                        Text(
-                          _formatDate(note.updatedAt),
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        }, childCount: notesList.length),
+      ),
     );
   }
 }

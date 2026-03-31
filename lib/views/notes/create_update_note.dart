@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -29,12 +30,20 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
     super.initState();
   }
 
+  String _formatDateTime(DateTime? date) {
+    if (date == null) return '';
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year.toString();
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return '$day/$month/$year at $hour:$minute';
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Create the future ONCE, not on every rebuild
     _noteFuture = createOrGetExistingNote().then((note) {
-      // After the note loads, update the share icon visibility
       if (mounted && _textConteroller.text.isNotEmpty && !_hasText) {
         setState(() {
           _hasText = true;
@@ -114,6 +123,36 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        leading: Platform.isIOS
+            ? Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface.withAlpha(150),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outline.withAlpha(50),
+                          width: 1.5,
+                        ),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(CupertinoIcons.back, size: 24),
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : null,
         actions: [
           AnimatedOpacity(
             opacity: _hasText ? 1.0 : 0.0,
@@ -121,15 +160,45 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
             curve: Curves.easeInOut,
             child: IgnorePointer(
               ignoring: !_hasText,
-              child: IconButton(
-                onPressed: () {
-                  final text = _textConteroller.text;
-                  if (text.isNotEmpty) {
-                    SharePlus.instance.share(ShareParams(text: text));
-                  }
-                },
-                icon: Icon(Platform.isIOS ? CupertinoIcons.share : Icons.share),
-              ),
+              child: Platform.isIOS
+                  ? Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(50),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surface.withAlpha(150),
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.outline.withAlpha(50),
+                                width: 1.5,
+                              ),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                final text = _textConteroller.text;
+                                if (text.isNotEmpty) {
+                                  SharePlus.instance.share(ShareParams(text: text));
+                                }
+                              },
+                              icon: const Icon(CupertinoIcons.share, size: 24),
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : IconButton(
+                      onPressed: () {
+                        final text = _textConteroller.text;
+                        if (text.isNotEmpty) {
+                          SharePlus.instance.share(ShareParams(text: text));
+                        }
+                      },
+                      icon: const Icon(Icons.share),
+                    ),
             ),
           ),
         ],
@@ -147,21 +216,48 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
                 _setUpTextControllerListner();
                 return Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: TextField(
-                    controller: _textConteroller,
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                    decoration: InputDecoration(
-                      hintText: 'Start writing your note...',
-                      border: InputBorder.none,
-                      hintStyle: Theme.of(context).textTheme.bodyLarge
-                          ?.copyWith(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(100),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          _formatDateTime(_note?.updatedAt),
+                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                              ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Expanded(
+                        child: TextField(
+                          controller: _textConteroller,
+                          keyboardType: TextInputType.multiline,
+                          maxLines: null,
+                          cursorHeight: 22,
+                          cursorWidth: 2.5,
+                          cursorRadius: const Radius.circular(2),
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                fontSize: 18,
+                                height: 1.6,
+                                letterSpacing: 0.2,
+                              ),
+                          decoration: InputDecoration(
+                            hintText: 'Start writing your note...',
+                            border: InputBorder.none,
+                            hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                  fontSize: 18,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(150),
+                                ),
                           ),
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               } else {

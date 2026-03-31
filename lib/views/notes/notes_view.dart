@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -47,31 +48,51 @@ class _NotesViewState extends State<NotesView> {
 
   Widget _buildAppBarActions() {
     if (Platform.isIOS) {
-      return IconButton(
-        onPressed: () {
-          showCupertinoModalPopup(
-            context: context,
-            builder: (context) => CupertinoActionSheet(
-              actions: [
-                CupertinoActionSheetAction(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _handleLogout();
-                  },
-                  isDestructiveAction: true,
-                  child: const Text('Log out'),
+      return Padding(
+        padding: const EdgeInsets.only(right: 8.0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(50),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface.withAlpha(150),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withAlpha(50),
+                  width: 1.5,
                 ),
-              ],
-              cancelButton: CupertinoActionSheetAction(
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: IconButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  showCupertinoModalPopup(
+                    context: context,
+                    builder: (context) => CupertinoActionSheet(
+                      actions: [
+                        CupertinoActionSheetAction(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _handleLogout();
+                          },
+                          isDestructiveAction: true,
+                          child: const Text('Log out'),
+                        ),
+                      ],
+                      cancelButton: CupertinoActionSheetAction(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+                  );
                 },
-                child: const Text('Cancel'),
+                icon: const Icon(CupertinoIcons.ellipsis, size: 24),
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
-          );
-        },
-        icon: const Icon(Icons.more_horiz),
+          ),
+        ),
       );
     } else {
       return PopupMenuButton<MenuAction>(
@@ -97,17 +118,30 @@ class _NotesViewState extends State<NotesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Your Notes'),
-        actions: [
-          _buildAppBarActions(),
-        ],
-      ),
       floatingActionButton: Platform.isIOS
-          ? IconButton(
-              onPressed: _navigateToNewNote,
-              icon: const Icon(CupertinoIcons.square_pencil, size: 36),
-              color: Theme.of(context).colorScheme.primary,
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(50),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface.withAlpha(150),
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withAlpha(50),
+                      width: 1.5,
+                    ),
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: IconButton(
+                    onPressed: _navigateToNewNote,
+                    icon: const Icon(CupertinoIcons.square_pencil, size: 32),
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
             )
           : FloatingActionButton(
               onPressed: _navigateToNewNote,
@@ -116,48 +150,53 @@ class _NotesViewState extends State<NotesView> {
       body: StreamBuilder(
         stream: _notesService.allNotes(ownerUserId: userId),
         builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-            case ConnectionState.active:
-              if (snapshot.hasData) {
-                final allNotes = snapshot.data as Iterable<CloudNote>;
-                if (allNotes.isEmpty) {
-                  return Center(
+          Widget content;
+
+          if (snapshot.connectionState == ConnectionState.waiting ||
+              snapshot.connectionState == ConnectionState.active) {
+            if (snapshot.hasData) {
+              final allNotes = snapshot.data as Iterable<CloudNote>;
+              if (allNotes.isEmpty) {
+                content = SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.note_add_outlined,
-                          size: 80,
+                          CupertinoIcons.doc_text_search,
+                          size: 100,
                           color: Theme.of(
                             context,
-                          ).colorScheme.primary.withAlpha(120),
+                          ).colorScheme.primary.withAlpha(80),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 24),
                         Text(
-                          'No notes yet',
-                          style: Theme.of(context).textTheme.titleLarge
+                          'No notes found',
+                          style: Theme.of(context).textTheme.headlineSmall
                               ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Tap + to create your first note',
+                          'Tap + to create your first note\nand start capturing your thoughts.',
+                          textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: Theme.of(
                                   context,
                                 ).colorScheme.onSurfaceVariant,
+                                height: 1.5,
                               ),
                         ),
                       ],
                     ),
-                  );
-                }
-                return NotesListView(
+                  ),
+                );
+              } else {
+                content = NotesListView(
                   notes: allNotes,
                   onDeleteNote: (note) async {
                     await _notesService.deleteNotes(
@@ -193,26 +232,41 @@ class _NotesViewState extends State<NotesView> {
                     ).pushNamed('/notes/new-note', arguments: note);
                   },
                 );
-              } else {
-                return Center(
+              }
+            } else {
+              content = SliverFillRemaining(
+                child: Center(
                   child: CircularProgressIndicator(
                     strokeWidth: 3,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                );
-              }
-            default:
-              return Center(
+                ),
+              );
+            }
+          } else {
+            content = SliverFillRemaining(
+              child: Center(
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
                   valueColor: AlwaysStoppedAnimation<Color>(
                     Theme.of(context).colorScheme.primary,
                   ),
                 ),
-              );
+              ),
+            );
           }
+
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar.large(
+                title: const Text('Your Notes'),
+                actions: [_buildAppBarActions()],
+              ),
+              content,
+            ],
+          );
         },
       ),
     );
