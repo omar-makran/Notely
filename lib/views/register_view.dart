@@ -63,6 +63,14 @@ class _RegisterViewState extends State<RegisterView> {
             topLeft: Radius.circular(32),
             topRight: Radius.circular(32),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).colorScheme.shadow.withAlpha(15),
+              blurRadius: 24,
+              spreadRadius: 2,
+              offset: const Offset(0, -8),
+            ),
+          ],
         ),
         padding: EdgeInsets.fromLTRB(
           24,
@@ -76,18 +84,22 @@ class _RegisterViewState extends State<RegisterView> {
             Text(
               'Sign Up',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
                 color: Theme.of(context).colorScheme.primary,
+                letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               'Create your account',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withAlpha(200),
+                letterSpacing: 0.2,
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 48),
             StyledTextField(
               controller: _email,
               icon: Icons.email_outlined,
@@ -162,13 +174,18 @@ class _RegisterViewState extends State<RegisterView> {
                   : null,
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),
+                elevation: 2,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(32),
                 ),
               ),
               child: const Text(
                 'Sign Up',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
               ),
             ),
             const SizedBox(height: 24.0),
