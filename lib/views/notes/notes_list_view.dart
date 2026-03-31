@@ -27,9 +27,31 @@ class NotesListView extends StatelessWidget {
     required this.onTap,
   });
 
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'Old note';
+
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inMinutes < 1) return 'Just now';
+    if (difference.inHours < 1) return '${difference.inMinutes}m ago';
+    if (difference.inDays < 1) return '${difference.inHours}h ago';
+    if (difference.inDays < 7) return '${difference.inDays}d ago';
+
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final notesList = notes.toList();
+    final notesList = notes.where((note) => note.text.trim().isNotEmpty).toList();
+
+    notesList.sort((a, b) {
+      final aDate = a.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final bDate = b.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+
+      return bDate.compareTo(aDate);
+    });
+
     return ListView.builder(
       itemCount: notesList.length,
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -50,7 +72,6 @@ class NotesListView extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Share button
                       Container(
                         width: 44,
                         height: 44,
@@ -79,7 +100,6 @@ class NotesListView extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Delete button
                       Container(
                         width: 44,
                         height: 44,
@@ -137,6 +157,17 @@ class NotesListView extends StatelessWidget {
                                 ),
                           ),
                         ],
+                        SizedBox(height: 12),
+                        Text(
+                          _formatDate(note.updatedAt),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
                       ],
                     ),
                   ),

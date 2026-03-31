@@ -100,20 +100,18 @@ class _NotesViewState extends State<NotesView> {
       appBar: AppBar(
         title: const Text('Your Notes'),
         actions: [
-          if (Platform.isIOS)
-            IconButton(
-              onPressed: _navigateToNewNote,
-              icon: const Icon(Icons.add),
-            ),
           _buildAppBarActions(),
         ],
       ),
-      // Android: Floating Action Button (native Material pattern)
       floatingActionButton: Platform.isIOS
-          ? null
+          ? IconButton(
+              onPressed: _navigateToNewNote,
+              icon: const Icon(CupertinoIcons.square_pencil, size: 36),
+              color: Theme.of(context).colorScheme.primary,
+            )
           : FloatingActionButton(
               onPressed: _navigateToNewNote,
-              child: Icon(Icons.add),
+              child: const Icon(Icons.add),
             ),
       body: StreamBuilder(
         stream: _notesService.allNotes(ownerUserId: userId),

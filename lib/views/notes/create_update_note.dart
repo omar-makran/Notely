@@ -56,7 +56,9 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
         _hasText = hasText;
       });
     }
-    await _notesService.updateNotes(documentId: note.documentId, text: text);
+    if (text != note.text) {
+      await _notesService.updateNotes(documentId: note.documentId, text: text);
+    }
   }
 
   void _setUpTextControllerListner() {
@@ -95,7 +97,7 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
   void _saveNoteIfTextIsNotEmpty() {
     final note = _note;
     final text = _textConteroller.text;
-    if (note != null && text.isNotEmpty) {
+    if (note != null && text.isNotEmpty && text != note.text) {
       _notesService.updateNotes(documentId: note.documentId, text: text);
     }
   }
@@ -112,9 +114,6 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          context.getArgument<CloudNote>() != null ? 'Edit Note' : 'New Note',
-        ),
         actions: [
           AnimatedOpacity(
             opacity: _hasText ? 1.0 : 0.0,
