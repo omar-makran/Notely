@@ -195,7 +195,7 @@ class _LoginViewState extends State<LoginView> {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              AuthHeroSection(imageHeight: 0.45, positionSize: -22),
+              AuthHeroSection(imageHeight: 0.36, positionSize: -9),
               _buildLoginSheet(context),
             ],
           ),
