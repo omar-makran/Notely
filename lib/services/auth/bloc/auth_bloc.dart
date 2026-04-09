@@ -19,6 +19,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     });
 
+    on<AuthEventReloadUser>((event, emit) async {
+      await provider.reloadUser();
+      final currentUser = provider.currentUser;
+      if (currentUser == null) {
+        emit(const AuthStateLoggedOut());
+      } else if (!currentUser.isEmailVerified) {
+        emit(const AuthStateNeedsVerification());
+      } else {
+        emit(AuthStateLoggedIn(user: currentUser));
+      }
+    });
+
     on<AuthEventLogIn>((event, emit) async {
       emit(AuthStateLoggedOut(isLoading: true));
       try {

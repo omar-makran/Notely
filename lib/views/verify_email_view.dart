@@ -173,7 +173,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView>
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: () {
-                context.read<AuthBloc>().add(const AuthEventInitialize());
+                context.read<AuthBloc>().add(const AuthEventReloadUser());
               },
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),

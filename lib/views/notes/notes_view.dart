@@ -181,7 +181,9 @@ class _NotesViewState extends State<NotesView> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Tap + to create your first note\nand start capturing your thoughts.',
+                          Platform.isIOS
+                              ? 'Tap the pencil icon to create your first note\nand start capturing your thoughts.'
+                              : 'Tap + to create your first note\nand start capturing your thoughts.',
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(

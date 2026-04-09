@@ -5,6 +5,8 @@ abstract class AuthProvider {
 
   AuthUser? get currentUser;
 
+  Future<void> reloadUser();
+
   Stream<AuthUser?> get authStateChanges;
 
   Future<AuthUser> logIn({
